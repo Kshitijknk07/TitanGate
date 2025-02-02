@@ -1,4 +1,4 @@
-# 🚀 **TitanGate** - High-Performance API Gateway with Rate Limiting, Caching, and Authentication
+# 🚀 **TitanGate** - High-Performance API Gateway with Rate Limiting, Caching, and Authentication and More
 
 Welcome to **TitanGate**, a powerful and scalable **API Gateway** built with **Fastify**. TitanGate handles key features like **Rate Limiting**, **Caching**, and **Authentication** to efficiently manage and optimize your backend services.
 
