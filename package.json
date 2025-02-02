@@ -1,5 +1,4 @@
 {
-  "name": "TitanGate",
   "version": "1.0.0",
   "description": "API Gateway with rate limiting, caching, and authentication",
   "main": "src/server.js",
