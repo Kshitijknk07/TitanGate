@@ -1,12 +1,18 @@
 {
+  "name": "TitanGate",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "@fastify/caching": "^9.0.3",
-    "@fastify/rate-limit": "^10.2.2",
-    "fastify": "^5.2.1"
-  },
+  "description": "API Gateway with rate limiting, caching, and authentication",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js"
-  }
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@fastify/caching": "^4.0.0",
+    "@fastify/rate-limit": "^6.0.0",
+    "fastify": "^5.0.0",
+    "fastify-jwt": "^3.0.0"
+  },
+  "devDependencies": {},
+  "author": "Your Name",
+  "license": "MIT"
 }
