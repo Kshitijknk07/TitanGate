@@ -8,6 +8,7 @@ Welcome to **TitanGate**, a powerful and scalable **API Gateway** built with **F
 
 - **✅ Rate Limiting**: Implemented rate limiting to ensure that API consumers don't overwhelm your services by making too many requests in a short period.
 - **✅ Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
+- **✅ Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
 
 ---
 
@@ -15,7 +16,6 @@ Welcome to **TitanGate**, a powerful and scalable **API Gateway** built with **F
 
 The following features are planned for future releases:
 
-- **🔐 Authentication**: Implementing secure authentication methods (such as JWT tokens) to ensure only authorized users can access certain routes.
 - **⚙️ Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability and better resource utilization.
 - **⚡ API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates.
 - **🔄 API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
@@ -73,10 +73,48 @@ Make sure you have the following installed on your machine:
 
 - **Rate Limiting**: Your API requests are limited to **100 requests per minute**. Exceeding the limit will result in a **429 Too Many Requests** error.
 - **Caching**: Common responses are cached and served quickly, reducing the time it takes to handle requests.
+- **Authentication**: You can authenticate using the **/login** endpoint by providing a valid **username** and **password**. Upon successful authentication, you will receive a **JWT token** that must be included in the **Authorization** header to access protected routes.
 
-To test, make requests to the following endpoint:
+### Example Request Flow:
+1. **Login** to get the token:
+   - **POST** `/login`
+   - Request Body:
+     ```json
+     {
+       "username": "admin",
+       "password": "password"
+     }
+     ```
+   - Response:
+     ```json
+     {
+       "token": "your-jwt-token"
+     }
+     ```
+
+2. **Access protected route** with token:
+   - **GET** `/protected`
+   - Add the following header in your request:
+     ```
+     Authorization: Bearer your-jwt-token
+     ```
+   - Response (if authorized):
+     ```json
+     {
+       "message": "You are authorized"
+     }
+     ```
+   - Response (if not authorized):
+     ```json
+     {
+       "message": "You are not authorized"
+     }
+     ```
+
+To test, make requests to the following endpoints:
 
 - `GET /` - Returns a simple message confirming that the API Gateway is running.
+
 
 
 ## 🛠 **Tech Stack**
