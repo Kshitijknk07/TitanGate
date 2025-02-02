@@ -3,10 +3,16 @@ import rateLimit from "./plugins/rateLimit";
 import caching from "./plugins/caching";
 import jwt from "./plugins/jwt";
 import apiRoutes from "./routes/apiRoutes";
+import v1 from "./v1";
+import v2 from "./v2";
 
 const fastify = Fastify({
   logger: true,
 });
+
+// Register versions
+fastify.register(v1, { prefix: "/v1" }); // http://localhost:3000/v1
+fastify.register(v2, { prefix: "/v2" }); // http://localhost:3000/v2
 
 // Register plugins
 fastify.register(rateLimit);
