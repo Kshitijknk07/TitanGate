@@ -4,11 +4,12 @@ Welcome to **TitanGate**, a powerful and scalable **API Gateway** built with **F
 
 ---
 
-## 🛠 **Current Features**
+🛠 **Current Features**
+- ✅ **Rate Limiting**: Implemented rate limiting to ensure that API consumers don't overwhelm your services by making too many requests in a short period.
+- ✅ **Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
+- ✅ **Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
+- ✅ **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
 
-- **✅ Rate Limiting**: Implemented rate limiting to ensure that API consumers don't overwhelm your services by making too many requests in a short period.
-- **✅ Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
-- **✅ Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
 
 ---
 
@@ -17,19 +18,21 @@ Welcome to **TitanGate**, a powerful and scalable **API Gateway** built with **F
 The following features are planned for future releases:
 
 - **⚙️ Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability and better resource utilization.
-- **⚡ API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates.
-- **🔄 API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
-
+- **⚡ API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates
+ 
 ---
 
 ## 🏁 **Project Status**
 
 - **✅ Completed**:
-    - Rate Limiting: Protects APIs from too many requests within a short period.
-    - Caching: Stores commonly used responses to minimize computation time and reduce load on backend servers.
+    - **Rate Limiting**: Protects APIs from too many requests within a short period.
+    - **Caching**: Stores commonly used responses to minimize computation time and reduce load on backend servers.
+    - **Authentication**: Integrated JWT-based authentication for secure user login and protected routes.
+    - **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
 
 - **🚧 In Progress**:
-    - Authentication and other advanced features such as load balancing, API analytics, and versioning will be implemented soon!
+    - **Load Balancing**: Distributing incoming traffic evenly across multiple backend services for better resource utilization and high availability.
+    - **API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates.
 
 ---
 
@@ -74,6 +77,7 @@ Make sure you have the following installed on your machine:
 - **Rate Limiting**: Your API requests are limited to **100 requests per minute**. Exceeding the limit will result in a **429 Too Many Requests** error.
 - **Caching**: Common responses are cached and served quickly, reducing the time it takes to handle requests.
 - **Authentication**: You can authenticate using the **/login** endpoint by providing a valid **username** and **password**. Upon successful authentication, you will receive a **JWT token** that must be included in the **Authorization** header to access protected routes.
+- **API Versioning**: You can access different API versions. By default, **v1** is available, and **v2** can be toggled on or off using feature flags.
 
 ### Example Request Flow:
 1. **Login** to get the token:
@@ -111,11 +115,14 @@ Make sure you have the following installed on your machine:
      }
      ```
 
+### API Versioning:
+- **v1**: Available by default at `/v1`.
+- **v2**: Can be accessed at `/v2` if enabled in the feature flags (`featureFlags.v2Enabled = true`).
+- **Note**: If **v2** is disabled via the feature flag, attempting to access `/v2` will result in a **404 Not Found** error.
+
 To test, make requests to the following endpoints:
 
 - `GET /` - Returns a simple message confirming that the API Gateway is running.
-
-
 
 ## 🛠 **Tech Stack**
 
