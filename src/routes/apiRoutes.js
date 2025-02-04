@@ -1,5 +1,5 @@
-import { login } from "../controllers/authController";
-import { protectedRoute } from "../controllers/protectedController";
+import { login } from "../controllers/authController.js";
+import { protectedRoute } from "../controllers/protectedController.js";
 
 export default async function (fastify, options) {
   // Authentication route

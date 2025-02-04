@@ -1,17 +1,21 @@
 {
   "version": "1.0.0",
   "description": "API Gateway with rate limiting, caching, and authentication",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js"
   },
   "dependencies": {
-    "@fastify/caching": "^4.0.0",
-    "@fastify/rate-limit": "^6.0.0",
+    "@fastify/caching": "^9.0.3",
+    "@fastify/rate-limit": "^10.2.2",
     "fastify": "^5.0.0",
-    "fastify-jwt": "^3.0.0"
+    "fastify-jwt": "^3.0.0",
+    "fastify-metrics": "^12.1.0",
+    "fastify-plugin": "^5.0.1",
+    "pino-pretty": "^13.0.0",
+    "prom-client": "^15.1.3"
   },
-  "devDependencies": {},
-  "author": "Your Name",
+  "author": "KSHITIJ NARAYAN KULKARNI",
   "license": "MIT"
 }
