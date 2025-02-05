@@ -1,3 +1,4 @@
+// src/server.js
 import Fastify from "fastify";
 import rateLimit from "./plugins/rateLimit.js";
 import caching from "./plugins/caching.js";
@@ -8,23 +9,23 @@ import v1 from "./v1/index.js";
 import v2 from "./v2/index.js";
 import fetch from "node-fetch";
 import { getNextBackend } from "./loadbalancer/loadBalancer.js";
-import cors from "@fastify/cors"; // Import CORS plugin
+import cors from "@fastify/cors";
 
 // Create Fastify instance
 const fastify = Fastify({ logger: true });
 
-// Register plugins
+// Register core plugins
 fastify.register(rateLimit);
 fastify.register(caching);
 fastify.register(jwt);
 fastify.register(analytics);
 
-// Register routes with versioning
+// Register versioned routes
 fastify.register(v1, { prefix: "/v1" });
 fastify.register(v2, { prefix: "/v2" });
 
-// Register the API routes
-fastify.register(apiRoutes);
+// Register API routes
+fastify.register(apiRoutes);  
 
 // Health Check Route
 fastify.get("/health", async (request, reply) => {
@@ -35,35 +36,46 @@ fastify.get("/health", async (request, reply) => {
   }
 });
 
-// Register CORS plugin for specific routes
+// Register CORS plugin
 fastify.register(cors, {
   origin: "http://localhost:5173", // Replace with your frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  preflightContinue: true, // Avoids automatic handling of OPTIONS requests
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed methods (OPTIONS is handled automatically)
+  preflightContinue: true // Let CORS plugin handle OPTIONS
 });
 
-// Load Balancer Middleware: Handle all requests and forward to the backend
-fastify.all("/*", async (request, reply) => {
-  const target = getNextBackend();
+// Load Balancer Route
+// Note: We use fastify.route with an explicit method list that excludes OPTIONS.
+fastify.route({
+  method: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"],
+  url: "/*",
+  handler: async (request, reply) => {
+    const target = getNextBackend();
+    try {
+      const response = await fetch(target + request.url, {
+        method: request.method,
+        headers: {
+          ...request.headers,
+          "x-forwarded-for": request.ip,
+        },
+        // Only attach a body for methods that support it
+        body: request.method !== "GET" && request.method !== "HEAD" ? JSON.stringify(request.body) : null,
+      });
 
-  try {
-    const response = await fetch(target + request.url, {
-      method: request.method,
-      headers: {
-        ...request.headers,
-        "x-forwarded-for": request.ip,
-      },
-      body: request.method !== "GET" && request.method !== "HEAD" ? JSON.stringify(request.body) : null,
-    });
-
-    reply.code(response.status).headers(response.headers.raw()).send(await response.text());
-  } catch (error) {
-    fastify.log.error(`Error in load balancing: ${error.message}`);
-    reply.code(500).send({ error: "Backend service unavailable" });
+      // Set response headers and send back the response body
+      reply.code(response.status);
+      // response.headers.raw() returns an object of header arrays; set each header accordingly
+      for (const [key, value] of Object.entries(response.headers.raw())) {
+        reply.header(key, value);
+      }
+      reply.send(await response.text());
+    } catch (error) {
+      fastify.log.error(`Error in load balancing: ${error.message}`);
+      reply.code(500).send({ error: "Backend service unavailable" });
+    }
   }
 });
 
-// Graceful Shutdown
+// Graceful Shutdown Handler
 const gracefulShutdown = async () => {
   try {
     await fastify.close();
@@ -75,6 +87,7 @@ const gracefulShutdown = async () => {
   }
 };
 
+// Global error handling for unhandled rejections and exceptions
 process.on("unhandledRejection", (err) => {
   fastify.log.error(`Unhandled Rejection: ${err}`);
   process.exit(1);
@@ -85,6 +98,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
+// Start the server
 const start = async () => {
   try {
     await fastify.listen({ port: 3000, host: "0.0.0.0" });
@@ -96,6 +110,7 @@ const start = async () => {
   }
 };
 
+// Listen for shutdown signals
 process.on("SIGTERM", gracefulShutdown);
 process.on("SIGINT", gracefulShutdown);
 

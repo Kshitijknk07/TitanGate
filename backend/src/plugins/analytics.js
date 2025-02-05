@@ -75,6 +75,6 @@ async function analytics(fastify, options) {
 }
 
 export default fp(analytics, {
-  name: "analytics-plugin", // Plugin name
-  fastify: "4.x", // Specify compatible Fastify version
+  name: "analytics-plugin",
+  fastify: "4.x || 5.x",
 });

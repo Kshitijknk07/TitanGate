@@ -1,7 +1,18 @@
-import jwt from "fastify-jwt";
+import fastifyPlugin from 'fastify-plugin';
+import fastifyJwt from '@fastify/jwt';
 
-export default async function (fastify, options) {
-  fastify.register(jwt, {
-    secret: "supersecret",
+async function jwtPlugin(fastify, options) {
+  fastify.register(fastifyJwt, {
+    secret: 'your-secret-key'
+  });
+
+  fastify.decorate('authenticate', async function (request, reply) {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
   });
 }
+
+export default fastifyPlugin(jwtPlugin);
