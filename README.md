@@ -9,6 +9,7 @@ TitanGate is a powerful and scalable API Gateway built with Fastify, designed to
 - ✅ **Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
 - ✅ **Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
 - ✅ **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
+- ✅ 📊 API Analytics: Integrated detailed request logging and performance tracking using Prometheus, allowing real-time monitoring of API traffic, response times, and error rates.
 
 
 ---
@@ -18,7 +19,7 @@ TitanGate is a powerful and scalable API Gateway built with Fastify, designed to
 The following features are planned for future releases:
 
 - **⚙️ Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability and better resource utilization.
-- **⚡ API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates
+- **🔗 GraphQL API Gateway: Dynamically convert REST APIs into GraphQL, allowing clients to fetch only the data they need while improving efficiency and flexibility.
  
 ---
 
@@ -29,10 +30,11 @@ The following features are planned for future releases:
     - **Caching**: Stores commonly used responses to minimize computation time and reduce load on backend servers.
     - **Authentication**: Integrated JWT-based authentication for secure user login and protected routes.
     - **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
+    - 📊 API Analytics: Integrated detailed analytics and logging using Prometheus to track request metrics, API performance, and error rates in real time.
 
 - **🚧 In Progress**:
     - **Load Balancing**: Distributing incoming traffic evenly across multiple backend services for better resource utilization and high availability.
-    - **API Analytics**: Integrating detailed analytics and logging to track request metrics, API performance, and error rates.
+    - 🚀 GraphQL API Gateway: Dynamically converting REST APIs into GraphQL endpoints, providing more flexible and efficient API consumption.
 
 ---
 
@@ -68,7 +70,7 @@ Make sure you have the following installed on your machine:
 4. Your API Gateway will be live at:
    
    ```bash
-    http://localhost:3000!
+    http://localhost:3000
    ```
    
 
@@ -78,6 +80,7 @@ Make sure you have the following installed on your machine:
 - **Caching**: Common responses are cached and served quickly, reducing the time it takes to handle requests.
 - **Authentication**: You can authenticate using the **/login** endpoint by providing a valid **username** and **password**. Upon successful authentication, you will receive a **JWT token** that must be included in the **Authorization** header to access protected routes.
 - **API Versioning**: You can access different API versions. By default, **v1** is available, and **v2** can be toggled on or off using feature flags.
+- **API Analytics**: Integrated analytics and logging to track request metrics, API performance, and error rates in real time.
 
 ### Example Request Flow:
 1. **Login** to get the token:
@@ -120,16 +123,33 @@ Make sure you have the following installed on your machine:
 - **v2**: Can be accessed at `/v2` if enabled in the feature flags (`featureFlags.v2Enabled = true`).
 - **Note**: If **v2** is disabled via the feature flag, attempting to access `/v2` will result in a **404 Not Found** error.
 
+### API Analytics:
+- **Endpoint**: `GET /metrics`
+- **Response Example**:
+  ```json
+  {
+    "requests_total": 1500,
+    "error_rate": 0.02,
+    "avg_response_time": "120ms"
+  }
+  ```
+- Analytics provides insights into API usage, error occurrences, and response performance.
+
 To test, make requests to the following endpoints:
 
 - `GET /` - Returns a simple message confirming that the API Gateway is running.
+- `GET /metrics` - Returns real-time API analytics data.
+
+
 
 ## 🛠 **Tech Stack**
 
 - **Backend Framework**: [Fastify](https://www.fastify.io/)
-- **Rate Limiting**: [@fastify/ratelimit](https://www.npmjs.com/package/@fastify/ratelimit)
+- **Rate Limiting**: [@fastify/rate-limit](https://www.npmjs.com/package/@fastify/rate-limit)
 - **Caching**: [@fastify/caching](https://www.npmjs.com/package/@fastify/caching)
-- **Authentication (Coming Soon)**: JWT, OAuth2, etc.
+- **Authentication**: [fastify-jwt](https://www.npmjs.com/package/fastify-jwt) (JWT-based authentication for secure API access)
+- **API Analytics**: [fastify-metrics](https://www.npmjs.com/package/fastify-metrics) (Collecting detailed API request logs, performance metrics, and error tracking)
+
 
 
 
