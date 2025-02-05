@@ -9,7 +9,8 @@ TitanGate is a powerful and scalable API Gateway built with Fastify, designed to
 - ✅ **Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
 - ✅ **Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
 - ✅ **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
-- ✅ 📊 API Analytics: Integrated detailed request logging and performance tracking using Prometheus, allowing real-time monitoring of API traffic, response times, and error rates.
+- ✅ **API Analytics**: Integrated detailed request logging and performance tracking using Prometheus, allowing real-time monitoring of API traffic, response times, and error rates.
+- ✅ **Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability, better resource utilization, and improved performance.
 
 
 ---
@@ -18,8 +19,7 @@ TitanGate is a powerful and scalable API Gateway built with Fastify, designed to
 
 The following features are planned for future releases:
 
-- **⚙️ Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability and better resource utilization.
-- **🔗 GraphQL API Gateway: Dynamically convert REST APIs into GraphQL, allowing clients to fetch only the data they need while improving efficiency and flexibility.
+- **GraphQL API Gateway**: Dynamically convert REST APIs into GraphQL, allowing clients to fetch only the data they need while improving efficiency and flexibility.
  
 ---
 
@@ -30,12 +30,11 @@ The following features are planned for future releases:
     - **Caching**: Stores commonly used responses to minimize computation time and reduce load on backend servers.
     - **Authentication**: Integrated JWT-based authentication for secure user login and protected routes.
     - **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
-    - 📊 API Analytics: Integrated detailed analytics and logging using Prometheus to track request metrics, API performance, and error rates in real time.
+    - **API Analytics**: Integrated detailed analytics and logging using Prometheus to track request metrics, API performance, and error rates in real time.
+    - **Load Balancing**: Distributes incoming traffic across multiple backend services to ensure high availability, better resource utilization, and optimal performance during peak loads.
 
 - **🚧 In Progress**:
-    - **Load Balancing**: Distributing incoming traffic evenly across multiple backend services for better resource utilization and high availability.
-    - 🚀 GraphQL API Gateway: Dynamically converting REST APIs into GraphQL endpoints, providing more flexible and efficient API consumption.
-
+    - **GraphQL API Gateway**: Dynamically converting REST APIs into GraphQL endpoints, providing more flexible and efficient API consumption.
 ---
 
 ## 🧑‍💻 **How to Get Started**
@@ -81,6 +80,7 @@ Make sure you have the following installed on your machine:
 - **Authentication**: You can authenticate using the **/login** endpoint by providing a valid **username** and **password**. Upon successful authentication, you will receive a **JWT token** that must be included in the **Authorization** header to access protected routes.
 - **API Versioning**: You can access different API versions. By default, **v1** is available, and **v2** can be toggled on or off using feature flags.
 - **API Analytics**: Integrated analytics and logging to track request metrics, API performance, and error rates in real time.
+- **Load Balancing**: Incoming traffic is distributed evenly across multiple backend services using a round-robin algorithm to ensure high availability and better resource utilization.
 
 ### Example Request Flow:
 1. **Login** to get the token:
@@ -134,11 +134,18 @@ Make sure you have the following installed on your machine:
   }
   ```
 - Analytics provides insights into API usage, error occurrences, and response performance.
+- **Load Balancing**:
+
+    How it works: The load balancer automatically distributes incoming traffic across multiple backend services using a round-robin approach. This ensures high availability and better performance by balancing the load among your backend servers.
+    In case of failure: If a backend service becomes unavailable, the load balancer will attempt to forward the request to the next available backend, ensuring minimal disruption.
+    Backend Services: The system will rotate between backend services like http://backend-service-1, http://backend-service-2, and http://backend-service-3 for a more resilient and scalable architecture.
 
 To test, make requests to the following endpoints:
 
 - `GET /` - Returns a simple message confirming that the API Gateway is running.
 - `GET /metrics` - Returns real-time API analytics data.
+- `GET /v1` - Access the v1 API version.
+- `GET /v2` - Access the v2 API version (if enabled).
 
 
 
@@ -149,8 +156,8 @@ To test, make requests to the following endpoints:
 - **Caching**: [@fastify/caching](https://www.npmjs.com/package/@fastify/caching)
 - **Authentication**: [fastify-jwt](https://www.npmjs.com/package/fastify-jwt) (JWT-based authentication for secure API access)
 - **API Analytics**: [fastify-metrics](https://www.npmjs.com/package/fastify-metrics) (Collecting detailed API request logs, performance metrics, and error tracking)
+- **Load Balancing**: Custom load balancing solution (Distributes incoming requests across multiple backend services for improved availability and performance)
 
 
 
-
-
+BY - **KSHITIJ NARAYAN KULKARNI**
