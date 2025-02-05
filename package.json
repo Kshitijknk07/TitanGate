@@ -1,17 +1,17 @@
 {
   "version": "1.0.0",
-  "description": "API Gateway with rate limiting, caching, and authentication",
+  "description": "API Gateway with rate limiting, caching, authentication, and analytics",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js"
   },
   "dependencies": {
-    "@fastify/caching": "^9.0.3",
-    "@fastify/rate-limit": "^10.2.2",
-    "fastify": "^5.0.0",
+    "@fastify/caching": "^8.4.0",
+    "@fastify/rate-limit": "^9.0.0",
+    "fastify": "^4.29.0",
     "fastify-jwt": "^3.0.0",
-    "fastify-metrics": "^12.1.0",
+    "fastify-metrics": "11.0.0",
     "fastify-plugin": "^5.0.1",
     "pino-pretty": "^13.0.0",
     "prom-client": "^15.1.3"
