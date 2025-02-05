@@ -8,11 +8,13 @@
   },
   "dependencies": {
     "@fastify/caching": "^8.4.0",
-    "@fastify/rate-limit": "^9.0.0",
-    "fastify": "^4.29.0",
-    "fastify-jwt": "^3.0.0",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/rate-limit": "^10.2.2",
+    "fastify": "^5.2.1",
+    "fastify-jwt": "^3.2.1",
     "fastify-metrics": "11.0.0",
     "fastify-plugin": "^5.0.1",
+    "node-fetch": "^3.3.2",
     "pino-pretty": "^13.0.0",
     "prom-client": "^15.1.3"
   },
