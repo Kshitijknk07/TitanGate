@@ -226,5 +226,41 @@ To test, make requests to the following endpoints:
 - `GET /v1` - Access the v1 API version.
 - `GET /v2` - Access the v2 API version (if enabled).
 
+
+
+
+## Tech Stack
+
+### Backend
+- [Node.js](https://nodejs.org/): JavaScript runtime environment.
+- [Fastify](https://www.fastify.io/): Web framework for Node.js.
+- [Prometheus](https://prometheus.io/): Monitoring and alerting toolkit.
+- [Node-Fetch](https://www.npmjs.com/package/node-fetch): A light-weight module that brings window.fetch to Node.js.
+- [Pino](https://getpino.io/): A fast JSON logger.
+
+**Fastify Plugins**:
+- [@fastify/caching](https://www.npmjs.com/package/@fastify/caching): Caching support.
+- [@fastify/cors](https://www.npmjs.com/package/@fastify/cors): CORS support.
+- [@fastify/jwt](https://www.npmjs.com/package/@fastify/jwt): JWT authentication.
+- [@fastify/rate-limit](https://www.npmjs.com/package/@fastify/rate-limit): Rate limiting.
+- [fastify-metrics](https://www.npmjs.com/package/fastify-metrics): Metrics collection.
+
+### Frontend
+- [React](https://reactjs.org/): JavaScript library for building user interfaces.
+- [Vite](https://vitejs.dev/): Next-generation frontend tooling.
+- [Tailwind CSS](https://tailwindcss.com/): Utility-first CSS framework.
+- [Framer Motion](https://www.framer.com/motion/): Animation library for React.
+- [ESLint](https://eslint.org/): Pluggable linting utility for JavaScript and JSX.
+- [Autoprefixer](https://github.com/postcss/autoprefixer): PostCSS plugin to parse CSS and add vendor prefixes.
+
+### Development Tools
+- [pnpm](https://pnpm.io/): Fast, disk space-efficient package manager.
+
+### Configuration and Build Tools
+- [PostCSS](https://postcss.org/): A tool for transforming CSS with JavaScript plugins.
+- [LightningCSS](https://github.com/Prefab/LightningCSS): A CSS parser and compiler.
+- [Rollup](https://rollupjs.org/): Module bundler for JavaScript.
+- [Jiti](https://github.com/aleclarson/jiti): A runtime for compiling and executing TypeScript and ESM.
+
   **MORE TO COME**
 
