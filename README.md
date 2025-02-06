@@ -1,78 +1,157 @@
-# 🚀 **TitanGate** - High-Performance API Gateway with Rate Limiting, Caching, and Authentication and More
+# TitanGate - High-Performance API Gateway
 
-TitanGate is a powerful and scalable API Gateway built with Fastify, designed to efficiently manage and optimize your backend services. With a focus on performance, security, and developer experience, TitanGate provides a robust set of features to ensure your APIs are reliable, scalable, and easy to maintain.
+
+
+## Overview
+
+TitanGate is a high-performance, scalable, and secure API Gateway built using Fastify. Designed to optimize API management, it ensures smooth communication between clients and backend services with robust features such as rate limiting, caching, authentication, analytics, and load balancing.
+
+## Key Features
+
+- **Rate Limiting**: Protects APIs from abuse by limiting requests per client.
+- **Caching**: Enhances response times and reduces server load with intelligent caching mechanisms.
+- **Authentication & Authorization**: Implements JWT-based security for endpoint access control.
+- **API Versioning**: Supports multiple API versions for seamless service evolution.
+- **API Analytics**: Provides real-time monitoring and performance tracking with Prometheus.
+- **Load Balancing**: Distributes incoming requests across multiple backend services for better availability.
+- **GraphQL API Gateway (Upcoming)**: Converts REST APIs dynamically into GraphQL for flexible data querying.
 
 ---
 
-🛠 **Current Features**
-- ✅ **Rate Limiting**: Implemented rate limiting to ensure that API consumers don't overwhelm your services by making too many requests in a short period.
-- ✅ **Caching**: Added caching functionality to store frequently requested data for quick retrieval, improving performance and reducing load on your servers.
-- ✅ **Authentication**: Integrated JWT-based authentication, allowing secure login and protected routes. Users can log in and receive a token for authorization to access protected resources.
-- ✅ **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
-- ✅ **API Analytics**: Integrated detailed request logging and performance tracking using Prometheus, allowing real-time monitoring of API traffic, response times, and error rates.
-- ✅ **Load Balancing**: Distributing incoming traffic evenly across multiple backend services to ensure high availability, better resource utilization, and improved performance.
+## Project Structure
 
+### Backend Architecture
+
+```
+backend/
+├── src/
+│   ├── controllers/
+│   │   ├── authController.js      # Handles authentication logic
+│   │   ├── userController.js      # Manages user-related endpoints
+│   │   └── protectedController.js # Secured API routes
+│   │
+│   ├── loadbalancer/
+│   │   └── loadBalancer.js       # Implements traffic distribution strategies
+│   │
+│   ├── plugins/
+│   │   ├── analytics.js         # Logs and tracks API metrics
+│   │   ├── caching.js           # Implements caching mechanisms
+│   │   ├── jwt.js               # Manages authentication middleware
+│   │   ├── rateLimit.js         # Rate limiting logic
+│   │   └── graphqlGateway.js    # Converts REST to GraphQL (Upcoming Feature)
+│   │
+│   ├── routes/
+│   │   ├── apiRoutes.js         # Defines all API endpoints
+│   │   ├── authRoutes.js        # Authentication endpoints
+│   │   └── userRoutes.js        # User management endpoints
+│   │
+│   ├── v1/                      # API Version 1 Implementation
+│   ├── v2/                      # API Version 2 Implementation
+│   └── server.js                 # Application entry point
+│
+├── package.json                 # Project dependencies
+├── pnpm-lock.yaml               # Dependency lockfile
+└── .gitignore                   # Files and folders to be ignored by Git
+```
+
+### Frontend Architecture
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── APIAnalytics.jsx    # Displays API analytics & metrics
+│   │   ├── Header.jsx          # Reusable header component
+│   │   ├── Sidebar.jsx         # Sidebar navigation
+│   │   ├── RateLimit.jsx       # Displays rate limiting information
+│   │   ├── GraphQLExplorer.jsx # UI for interacting with GraphQL API
+│   │
+│   ├── hooks/
+│   │   ├── useAuth.js         # Authentication state management
+│   │   ├── useFetch.js        # Reusable API request hook
+│   │
+│   ├── pages/
+│   │   ├── Dashboard.jsx      # Displays key metrics and analytics
+│   │   ├── Home.jsx           # Homepage with overview details
+│   │   ├── Login.jsx          # Login page
+│   │   └── GraphQLPlayground.jsx # UI for GraphQL queries (Upcoming)
+│   │
+│   ├── utils/
+│   │   └── api.js             # Handles API requests
+│   │
+│   ├── app.jsx                 # Main application file
+│   ├── index.css               # Global styles
+│   └── main.jsx                # Root entry file
+```
 
 ---
 
-## 📈 **Upcoming Features**
+## Project Status
 
-The following features are planned for future releases:
+### ✅ Completed Features:
 
-- **GraphQL API Gateway**: Dynamically convert REST APIs into GraphQL, allowing clients to fetch only the data they need while improving efficiency and flexibility.
- 
+- **Rate Limiting**: Protects endpoints from excessive requests.
+- **Caching**: Optimizes performance with response caching.
+- **Authentication**: Implements JWT-based security.
+- **API Versioning**: Supports multiple API versions.
+- **API Analytics**: Provides monitoring via Prometheus.
+- **Load Balancing**: Distributes traffic for high availability.
+
+### 🚀 In Progress:
+
+- **GraphQL API Gateway**: Dynamically converts REST APIs into GraphQL.
+- **Improved Admin Dashboard**: Enhanced UI for API monitoring & management.
+
 ---
 
-## 🏁 **Project Status**
-
-- **✅ Completed**:
-    - **Rate Limiting**: Protects APIs from too many requests within a short period.
-    - **Caching**: Stores commonly used responses to minimize computation time and reduce load on backend servers.
-    - **Authentication**: Integrated JWT-based authentication for secure user login and protected routes.
-    - **API Versioning**: Managing different API versions to maintain compatibility with older clients while allowing new features to be introduced.
-    - **API Analytics**: Integrated detailed analytics and logging using Prometheus to track request metrics, API performance, and error rates in real time.
-    - **Load Balancing**: Distributes incoming traffic across multiple backend services to ensure high availability, better resource utilization, and optimal performance during peak loads.
-
-- **🚧 In Progress**:
-    - **GraphQL API Gateway**: Dynamically converting REST APIs into GraphQL endpoints, providing more flexible and efficient API consumption.
----
-
-## 🧑‍💻 **How to Get Started**
+## Getting Started
 
 ### Prerequisites
 
-Make sure you have the following installed on your machine:
+Ensure you have the following installed:
 
-- **Node.js** (v16.x or higher)
-- **pnpm** (preferred package manager)
+- Node.js (>=16.x)
+- pnpm (or npm/yarn)
+- Docker (optional for running services)
+
+### Installation
+
+```sh
+git clone https://github.com/Kshitijknk07/TitanGate.git
+cd TitanGate
+pnpm i
+```
+
+### Running the Backend
+
+```sh
+cd backend
+pnpm start
+```
+
+Once the backend starts, you should see output similar to:
+
+```
+🚀 SERVER IS RUNNING ON http://localhost:3000
+📊 Metrics available at http://localhost:3000/metrics
+```
+
+### Running the Frontend
+
+```sh
+cd frontend
+pnpm run dev
+```
+
+Once the frontend starts, you should see output similar to:
+
+```
+VITE v6.1.0  ready in 503 ms
+➜  Local:   http://localhost:5173/
+➜  Network: use --host to expose
+```
 
 ---
-
-### Setup
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/Kshitijknk07/TitanGate.git
-   cd TitanGate
-   ```
-2. install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-3. Run the project:
-
-   ```bash
-   pnpm start
-   ```
-4. Your API Gateway will be live at:
-   
-   ```bash
-    http://localhost:3000
-   ```
-   
-
 ## 📝 **Usage**
 
 - **Rate Limiting**: Your API requests are limited to **100 requests per minute**. Exceeding the limit will result in a **429 Too Many Requests** error.
@@ -147,17 +226,5 @@ To test, make requests to the following endpoints:
 - `GET /v1` - Access the v1 API version.
 - `GET /v2` - Access the v2 API version (if enabled).
 
+  **MORE TO COME**
 
-
-## 🛠 **Tech Stack**
-
-- **Backend Framework**: [Fastify](https://www.fastify.io/)
-- **Rate Limiting**: [@fastify/rate-limit](https://www.npmjs.com/package/@fastify/rate-limit)
-- **Caching**: [@fastify/caching](https://www.npmjs.com/package/@fastify/caching)
-- **Authentication**: [fastify-jwt](https://www.npmjs.com/package/fastify-jwt) (JWT-based authentication for secure API access)
-- **API Analytics**: [fastify-metrics](https://www.npmjs.com/package/fastify-metrics) (Collecting detailed API request logs, performance metrics, and error tracking)
-- **Load Balancing**: Custom load balancing solution (Distributes incoming requests across multiple backend services for improved availability and performance)
-
-
-
-BY - **KSHITIJ NARAYAN KULKARNI**
