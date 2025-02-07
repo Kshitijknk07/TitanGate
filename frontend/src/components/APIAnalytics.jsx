@@ -1,15 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { authenticatedFetch } from "../utils/api";
 
 const APIAnalytics = () => {
   const [traffic, setTraffic] = useState(0);
   const [errors, setErrors] = useState(0);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    setTimeout(() => {
-      setTraffic(5000);
-      setErrors(20);
-    }, 1000);
+    const fetchData = async () => {
+      try {
+        const response = await authenticatedFetch(`${API_URL}/metrics`);
+        if (!response.ok) throw new Error('Failed to fetch metrics');
+        const data = await response.json();
+        setTraffic(data.traffic);
+        setErrors(data.errors);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTraffic(0);
+        setErrors(0);
+      }
+    };
+
+    fetchData();
+    
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

@@ -1,5 +1,6 @@
-// src/server.js
 import Fastify from "fastify";
+import cors from "@fastify/cors";
+import fetch from "node-fetch";
 import rateLimit from "./plugins/rateLimit.js";
 import caching from "./plugins/caching.js";
 import jwt from "./plugins/jwt.js";
@@ -7,87 +8,76 @@ import analytics from "./plugins/analytics.js";
 import apiRoutes from "./routes/apiRoutes.js";
 import v1 from "./v1/index.js";
 import v2 from "./v2/index.js";
-import fetch from "node-fetch";
 import { getNextBackend } from "./loadbalancer/loadBalancer.js";
-import cors from "@fastify/cors";
+import errorHandler from "./plugins/errorHandler.js"; 
 
-// Create Fastify instance
+// Initialize Fastify instance with logging enabled
 const fastify = Fastify({ logger: true });
 
-// Register core plugins
+// Register plugins
 fastify.register(rateLimit);
 fastify.register(caching);
 fastify.register(jwt);
 fastify.register(analytics);
+fastify.register(errorHandler);
 
-// Register versioned routes
+// Register versioned API routes
 fastify.register(v1, { prefix: "/v1" });
 fastify.register(v2, { prefix: "/v2" });
+fastify.register(apiRoutes);
 
-// Register API routes
-fastify.register(apiRoutes);  
-
-// Health Check Route
+// Health check endpoint
 fastify.get("/health", async (request, reply) => {
-  try {
-    reply.send({ status: "ok", uptime: process.uptime() });
-  } catch (err) {
-    reply.code(500).send({ error: "Health check failed", details: err.message });
-  }
+  reply.send({ status: "ok", uptime: process.uptime() });
 });
 
-// Register CORS plugin
+// Register CORS
 fastify.register(cors, {
-  origin: "http://localhost:5173", // Replace with your frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed methods (OPTIONS is handled automatically)
-  preflightContinue: true // Let CORS plugin handle OPTIONS
+  origin: ["http://localhost:5173", "http://localhost:3000"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 });
 
 // Load Balancer Route
-// Note: We use fastify.route with an explicit method list that excludes OPTIONS.
 fastify.route({
   method: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"],
   url: "/*",
   handler: async (request, reply) => {
-    const target = getNextBackend();
+    const target = getNextBackend();  // Get the next backend server for load balancing
     try {
       const response = await fetch(target + request.url, {
         method: request.method,
-        headers: {
-          ...request.headers,
-          "x-forwarded-for": request.ip,
-        },
-        // Only attach a body for methods that support it
+        headers: { ...request.headers, "x-forwarded-for": request.ip },
         body: request.method !== "GET" && request.method !== "HEAD" ? JSON.stringify(request.body) : null,
       });
-
-      // Set response headers and send back the response body
+      
       reply.code(response.status);
-      // response.headers.raw() returns an object of header arrays; set each header accordingly
-      for (const [key, value] of Object.entries(response.headers.raw())) {
-        reply.header(key, value);
-      }
+      Object.entries(response.headers.raw()).forEach(([key, value]) => reply.header(key, value));
       reply.send(await response.text());
     } catch (error) {
-      fastify.log.error(`Error in load balancing: ${error.message}`);
+      fastify.log.error(`Load balancer error: ${error.message}`);
       reply.code(500).send({ error: "Backend service unavailable" });
     }
-  }
+  },
 });
 
-// Graceful Shutdown Handler
+// Graceful shutdown
 const gracefulShutdown = async () => {
   try {
     await fastify.close();
-    console.log("Server gracefully shut down");
+    console.log("Server shut down gracefully");
     process.exit(0);
   } catch (err) {
-    console.error("Error during graceful shutdown", err);
+    console.error("Error during shutdown", err);
     process.exit(1);
   }
 };
 
-// Global error handling for unhandled rejections and exceptions
+// Handle process signals for graceful shutdown
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
+
+// Handle global errors
 process.on("unhandledRejection", (err) => {
   fastify.log.error(`Unhandled Rejection: ${err}`);
   process.exit(1);
@@ -98,20 +88,16 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-// Start the server
+// Start server
 const start = async () => {
   try {
     await fastify.listen({ port: 3000, host: "0.0.0.0" });
-    console.log("🚀 SERVER IS RUNNING ON http://localhost:3000");
+    console.log("🚀 Server running on http://localhost:3000");
     console.log("📊 Metrics available at http://localhost:3000/metrics");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
-
-// Listen for shutdown signals
-process.on("SIGTERM", gracefulShutdown);
-process.on("SIGINT", gracefulShutdown);
 
 start();
