@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
-class RestToGraphQL {
+export default class RestToGraphQL {
   constructor(baseURL) {
     this.baseURL = baseURL;  // The base URL of your REST API
   }
@@ -32,5 +32,3 @@ class RestToGraphQL {
     }
   }
 }
-
-module.exports = RestToGraphQL;

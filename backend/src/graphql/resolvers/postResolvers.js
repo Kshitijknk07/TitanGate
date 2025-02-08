@@ -1,4 +1,4 @@
-import RestToGraphQL from '../dataSources/RestToGraphQL.js';  // Import the REST-to-GraphQL class
+import RestToGraphQL from '../dataSources/RestToGraphQL.js';  // Correct import for default export
 
 // Create an instance of RestToGraphQL for posts
 const restToGraphQL = new RestToGraphQL('https://jsonplaceholder.typicode.com'); // Replace with your REST API base URL

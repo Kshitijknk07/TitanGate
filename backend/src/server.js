@@ -10,6 +10,9 @@ import v1 from "./v1/index.js";
 import v2 from "./v2/index.js";
 import { getNextBackend } from "./loadbalancer/loadBalancer.js";
 import errorHandler from "./plugins/errorHandler.js"; 
+import { ApolloServer } from "apollo-server-fastify";
+import schemas from "./graphql/schemas/index.js";
+import resolvers from "./graphql/resolvers/index.js";
 
 // Initialize Fastify instance with logging enabled
 const fastify = Fastify({ logger: true });
@@ -60,6 +63,16 @@ fastify.route({
     }
   },
 });
+
+// Integrate Apollo Server for GraphQL
+const apolloServer = new ApolloServer({
+  typeDefs: schemas,
+  resolvers,
+  context: ({ request, reply }) => ({ request, reply }),
+});
+
+await apolloServer.start();
+fastify.register(apolloServer.createHandler());
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
