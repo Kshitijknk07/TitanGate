@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { login } from '../utils/api';
-import { useHistory } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { login } from "../utils/api";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const history = useHistory();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const success = await login(username, password);
     if (success) {
-      history.push('/dashboard'); // Redirect to dashboard
+      navigate("/dashboard"); 
     } else {
-      setError('Invalid credentials');
+      setError("Invalid credentials");
     }
   };
 
@@ -54,7 +54,7 @@ const Login = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               whileFocus={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 200 }}
+              transition={{ type: "spring", stiffness: 200 }}
             />
           </div>
 
@@ -69,7 +69,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               whileFocus={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 200 }}
+              transition={{ type: "spring", stiffness: 200 }}
             />
           </div>
 
@@ -88,7 +88,7 @@ const Login = () => {
             type="submit"
             className="w-full bg-black text-white p-3 rounded mt-4 hover:bg-gray-900"
             whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 200 }}
+            transition={{ type: "spring", stiffness: 200 }}
           >
             Login
           </motion.button>
