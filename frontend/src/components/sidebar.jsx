@@ -6,14 +6,26 @@ const Sidebar = () => {
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-black text-white w-64 h-screen p-4 border-r border-gray-700"
+      transition={{ duration: 0.8, ease: "easeOut", bounce: 0.3 }}
+      className="bg-black text-white w-64 h-screen p-6 border-r border-gray-800 shadow-xl"
     >
-      <h2 className="text-2xl font-bold mb-6">Navigation</h2>
-      <ul>
-        <li className="mb-4 hover:text-gray-400"><a href="#">API Analytics</a></li>
-        <li className="mb-4 hover:text-gray-400"><a href="#">Load Balancing</a></li>
-        <li className="mb-4 hover:text-gray-400"><a href="#">GraphQL Gateway</a></li>
+      <motion.h2
+        whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+        className="text-2xl font-extrabold mb-6 tracking-wide"
+      >
+        Navigation
+      </motion.h2>
+      <ul className="space-y-4">
+        {["API Analytics", "Load Balancing", "GraphQL Gateway"].map((item, index) => (
+          <motion.li
+            key={index}
+            whileHover={{ scale: 1.05, color: "#9ca3af" }}
+            transition={{ duration: 0.3 }}
+            className="text-lg font-medium cursor-pointer"
+          >
+            <a href="#">{item}</a>
+          </motion.li>
+        ))}
       </ul>
     </motion.div>
   );

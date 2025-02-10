@@ -3,13 +3,18 @@ import { motion } from "framer-motion";
 
 const Footer = () => {
   return (
-    <motion.footer 
+    <motion.footer
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-black text-white py-4 text-center border-t border-gray-700"
+      transition={{ duration: 0.8, ease: "easeOut", bounce: 0.3 }}
+      className="bg-black text-white py-6 text-center border-t border-gray-800"
     >
-      <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} TitanGate. All rights reserved.</p>
+      <motion.p
+        whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+        className="text-gray-400 text-sm tracking-wide"
+      >
+        &copy; {new Date().getFullYear()} <span className="text-white font-semibold">TitanGate</span>. All rights reserved.
+      </motion.p>
     </motion.footer>
   );
 };

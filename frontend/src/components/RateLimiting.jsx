@@ -16,15 +16,23 @@ const RateLimiting = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-black text-white p-6 rounded-2xl shadow-xl border border-gray-700 w-80 mx-auto"
+      transition={{ duration: 0.8, ease: "easeOut", bounce: 0.3 }}
+      className="bg-black text-white p-6 rounded-2xl shadow-2xl border border-gray-800 w-80 mx-auto"
     >
-      <h3 className="text-2xl font-bold mb-2">Rate Limiting</h3>
-      <p className="text-gray-400">Requests left: {remaining}</p>
-      <div className="mt-4 bg-gray-800 p-4 rounded-lg">
-        <p className="text-white">Current limit: 100 requests/min</p>
-        <p className="text-white">Remaining: {remaining} requests</p>
-      </div>
+      <motion.h3
+        whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+        className="text-2xl font-extrabold mb-2 tracking-wide"
+      >
+        Rate Limiting
+      </motion.h3>
+      <p className="text-gray-400 text-lg font-medium">Requests left: {remaining}</p>
+      <motion.div
+        whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
+        className="mt-4 bg-gray-900 p-5 rounded-xl shadow-md"
+      >
+        <p className="text-gray-300 text-lg">Current limit: <span className="text-white">100 requests/min</span></p>
+        <p className="text-gray-300 text-lg">Remaining: <span className="text-white">{remaining} requests</span></p>
+      </motion.div>
     </motion.div>
   );
 };
