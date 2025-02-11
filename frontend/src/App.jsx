@@ -6,7 +6,7 @@ import Home from './pages/Home';
 
 const App = () => {
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen font-sans">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -17,7 +17,7 @@ const App = () => {
 
       <div className="flex">
         <motion.div
-          className="w-64 bg-gray-800 shadow-lg"
+          className="w-72 bg-gray-900 shadow-xl p-4"
           initial={{ x: -300 }}
           animate={{ x: 0 }}
           transition={{ type: 'spring', stiffness: 100 }}
@@ -26,7 +26,7 @@ const App = () => {
         </motion.div>
 
         <motion.main
-          className="flex-1 p-6"
+          className="flex-1 p-8 bg-gray-950 rounded-lg shadow-md mx-4 mt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
