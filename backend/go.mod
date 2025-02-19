@@ -10,11 +10,14 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
