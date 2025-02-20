@@ -21,3 +21,4 @@ TitanGate is a high-performance, scalable, and secure API Gateway built using Fa
 ## Completed Features
 
 - **Rate Limiting**: controls the number of requests a client can make to an API within a specific time frame to prevent abuse, ensure fair usage, and protect server resources.
+- **Caching**: stores frequently accessed API responses and database query results in Redis to improve response times and reduce server load.
