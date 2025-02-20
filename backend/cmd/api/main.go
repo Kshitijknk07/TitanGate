@@ -1,4 +1,4 @@
-// cmd/api/main.go
+
 package main
 
 import (
@@ -13,10 +13,10 @@ import (
 )
 
 func main() {
-	// Load environment variables
+	
 	config.LoadEnv()
 
-	// Initialize Redis for rate limiting and caching
+	
 	services.InitRedis()
 	services.InitCache()
 
@@ -25,7 +25,7 @@ func main() {
 
 	app := fiber.New()
 
-	// Apply middlewares globally
+	
 	app.Use(middleware.RateLimit)
 	app.Use(middleware.CacheMiddleware)
 
