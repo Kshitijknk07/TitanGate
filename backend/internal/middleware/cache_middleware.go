@@ -1,61 +1,43 @@
-
 package middleware
 
 import (
-	"context"
+	"bytes"
+	"io"
 	"net/http"
+	"time"
 
-	"github.com/golang/groupcache"
+	"titangate/internal/cache"
 )
 
-const cacheSize = 64 << 20 
-
-var TitanCache = groupcache.NewGroup("TitanGateCache", cacheSize, groupcache.GetterFunc(
-	func(ctx groupcache.Context, key string, dest groupcache.Sink) error {
-		
-		return nil
-	},
-))
+var redisCache = cache.NewRedisCache()
 
 
 func CacheMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		key := r.RequestURI 
-		if data, err := GetFromCache(key); err == nil {
-			w.Write(data) 
+		cacheKey := "resp:" + r.URL.Path
+
+		
+		cachedResponse, err := redisCache.Get(cacheKey)
+		if err == nil {
+			w.Write([]byte(cachedResponse))
 			return
 		}
 
-		
-		rec := &responseRecorder{ResponseWriter: w}
+		rec := &responseRecorder{ResponseWriter: w, body: new(bytes.Buffer)}
 		next.ServeHTTP(rec, r)
 
-		SetCache(key, rec.body) 
+		
+		redisCache.Set(cacheKey, rec.body.String(), 10*time.Minute)
 	})
 }
 
 
-func GetFromCache(key string) ([]byte, error) {
-	var data []byte
-	err := TitanCache.Get(context.TODO(), key, groupcache.AllocatingByteSliceSink(&data))
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-
-func SetCache(key string, value []byte) {
-	
-	TitanCache.Get(context.TODO(), key, groupcache.AllocatingByteSliceSink(&value))
-}
-
 type responseRecorder struct {
 	http.ResponseWriter
-	body []byte
+	body *bytes.Buffer
 }
 
-func (r *responseRecorder) Write(b []byte) (int, error) {
-	r.body = append(r.body, b...)
-	return r.ResponseWriter.Write(b)
+func (r *responseRecorder) Write(p []byte) (int, error) {
+	r.body.Write(p)
+	return r.ResponseWriter.Write(p)
 }
