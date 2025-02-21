@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"io"
 	"net/http"
 	"time"
 
@@ -11,14 +10,11 @@ import (
 
 var redisCache = cache.NewRedisCache()
 
-
 func CacheMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cacheKey := "resp:" + r.URL.Path
 
-		
-		cachedResponse, err := redisCache.Get(cacheKey)
-		if err == nil {
+		if cachedResponse, err := redisCache.Get(cacheKey); err == nil {
 			w.Write([]byte(cachedResponse))
 			return
 		}
@@ -26,11 +22,9 @@ func CacheMiddleware(next http.Handler) http.Handler {
 		rec := &responseRecorder{ResponseWriter: w, body: new(bytes.Buffer)}
 		next.ServeHTTP(rec, r)
 
-		
 		redisCache.Set(cacheKey, rec.body.String(), 10*time.Minute)
 	})
 }
-
 
 type responseRecorder struct {
 	http.ResponseWriter
