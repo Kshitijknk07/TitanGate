@@ -38,3 +38,16 @@ func (r *responseRecorder) Write(p []byte) (int, error) {
 	r.body.Write(p)
 	return r.ResponseWriter.Write(p)
 }
+func CacheMiddleware(c *fiber.Ctx) error {
+    cacheKey := "resp:" + c.Path()
+
+    if cachedResponse, err := redisCache.Get(cacheKey); err == nil {
+        metrics.CacheHits.Inc()
+        return c.Send([]byte(cachedResponse))
+    }
+    
+    metrics.CacheMisses.Inc()
+    
+    // Continue with the request
+    return c.Next()
+}

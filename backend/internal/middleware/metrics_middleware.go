@@ -1,32 +1,33 @@
 package middleware
 
 import (
-	"time"
+    "strconv"
+    "time"
 
-	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
-	"github.com/gofiber/fiber/v2"
+    "github.com/gofiber/fiber/v2"
+    "github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
 )
 
 func MetricsMiddleware() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		start := time.Now()
-		path := c.Path()
-		method := c.Method()
+    return func(c *fiber.Ctx) error {
+        startTime := time.Now()
+        path := c.Route().Path // Using Route().Path instead of Path() for consistent metrics
+        method := c.Method()
 
-		// Track active requests
-		metrics.ActiveRequests.Inc()
-		defer metrics.ActiveRequests.Dec()
+        metrics.ActiveRequests.Inc()
 
-		// Process request
-		err := c.Next()
+        // Execute the next handler
+        err := c.Next()
 
-		// Record metrics
-		status := c.Response().StatusCode()
-		duration := time.Since(start).Seconds()
+        metrics.ActiveRequests.Dec()
+        
+        // Record metrics after response
+        status := strconv.Itoa(c.Response().StatusCode())
+        duration := time.Since(startTime).Seconds()
 
-		metrics.RequestCounter.WithLabelValues(path, method, string(status)).Inc()
-		metrics.ResponseTime.WithLabelValues(path, method).Observe(duration)
+        metrics.RequestCounter.WithLabelValues(path, method, status).Inc()
+        metrics.ResponseTime.WithLabelValues(path, method).Observe(duration)
 
-		return err
-	}
+        return err
+    }
 }
