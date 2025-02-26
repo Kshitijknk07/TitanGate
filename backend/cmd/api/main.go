@@ -10,6 +10,7 @@ import (
 	"github.com/Kshitijknk07/TitanGate/backend/internal/routes"
 	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
 	"github.com/gofiber/fiber/v2"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -23,8 +24,15 @@ func main() {
 
 	
 	app := fiber.New()
-	
-	
+
+	// Add metrics middleware before other middleware
+	app.Use(middleware.MetricsMiddleware())
+	app.Use(middleware.RateLimit)
+	app.Use(middleware.CacheMiddleware)
+
+	// Prometheus metrics endpoint
+	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
+
 	versionConfig := middleware.NewVersionConfig()
 	app.Use(middleware.APIVersionMiddleware(versionConfig))
 	

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"titangate/internal/cache"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
 )
 
 var redisCache = cache.NewRedisCache()
@@ -15,9 +16,11 @@ func CacheMiddleware(next http.Handler) http.Handler {
 		cacheKey := "resp:" + r.URL.Path
 
 		if cachedResponse, err := redisCache.Get(cacheKey); err == nil {
+			metrics.CacheHits.Inc()
 			w.Write([]byte(cachedResponse))
 			return
 		}
+		metrics.CacheMisses.Inc()
 
 		rec := &responseRecorder{ResponseWriter: w, body: new(bytes.Buffer)}
 		next.ServeHTTP(rec, r)
