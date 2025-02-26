@@ -3,17 +3,33 @@ package routes
 import (
 	"github.com/Kshitijknk07/TitanGate/backend/internal/handlers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gorilla/mux"	
 )
 
+func SetupRoutes(app *fiber.App, vRouter *VersionedRouter) {
+	
+	v1 := vRouter.Group("v1")
+	setupV1Routes(v1)
 
-func SetupRoutes(app *fiber.App) {
-	app.Get("/health", handlers.HealthCheck)
+	
+	v2 := vRouter.Group("v2")
+	setupV2Routes(v2)
+
+	
+	app.Get("/api", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"versions": vRouter.GetSupportedVersions(),
+			"latest":   vRouter.GetLatestVersion(),
+			"current": c.Locals("version"),
+		})
+	})
 }
 
-func NewRouter() *mux.Router {
-	r := mux.NewRouter()
-	r.HandleFunc("/user", handlers.GetUserHandler).Methods("GET")
+func setupV1Routes(router fiber.Router) {
+	router.Get("/health", handlers.HealthCheckV1)
+	router.Get("/user", handlers.GetUserHandlerV1)
+}
 
-	return r
+func setupV2Routes(router fiber.Router) {
+	router.Get("/health", handlers.HealthCheckV2)
+	router.Get("/user", handlers.GetUserHandlerV2)
 }

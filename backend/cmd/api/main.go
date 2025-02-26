@@ -21,13 +21,20 @@ func main() {
 	port := os.Getenv("PORT")
 	appName := os.Getenv("APP_NAME")
 
+	
 	app := fiber.New()
-
+	
+	
+	versionConfig := middleware.NewVersionConfig()
+	app.Use(middleware.APIVersionMiddleware(versionConfig))
+	
+	
 	app.Use(middleware.RateLimit)
 	app.Use(middleware.CacheMiddleware)
-
-	router.SetupRoutes(app)
-
+	
+	
+	vRouter := routes.NewVersionedRouter(app)
+	routes.SetupRoutes(app, vRouter)
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString(fmt.Sprintf("%s Backend is Running!", appName))
 	})

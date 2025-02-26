@@ -10,7 +10,6 @@ TitanGate is a high-performance, scalable, and secure API Gateway built using Fa
 
 - **Rate Limiting**: Protects APIs from abuse by limiting requests per client.
 - **Caching**: Enhances response times and reduces server load with intelligent caching mechanisms.
-- **Authentication & Authorization**: Implements JWT-based security for endpoint access control.
 - **API Versioning**: Supports multiple API versions for seamless service evolution.
 - **API Analytics**: Provides real-time monitoring and performance tracking with Prometheus.
 - **Load Balancing**: Distributes incoming requests across multiple backend services for better availability.
