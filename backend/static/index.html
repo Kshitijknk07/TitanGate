@@ -5,62 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TitanGate Dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <h1>TitanGate</h1>
             <nav>
-                <a href="#" class="active"><i class="material-icons">dashboard</i>Dashboard</a>
-                <a href="#"><i class="material-icons">shield</i>Rate Limiting</a>
-                <a href="#"><i class="material-icons">storage</i>Caching</a>
-                <a href="#"><i class="material-icons">alt_route</i>API Versions</a>
-                <a href="#"><i class="material-icons">analytics</i>Analytics</a>
-                <a href="#"><i class="material-icons">balance</i>Load Balancing</a>
+                <a href="#overview" class="active">Overview</a>
+                <a href="#load-balancer">Load Balancer</a>
+                <a href="#rate-limits">Rate Limits</a>
+                <a href="#cache">Cache</a>
+                <a href="#metrics">Metrics</a>
             </nav>
         </aside>
 
         <main class="content">
-            <header>
+            <section id="overview" class="active">
                 <h2>System Overview</h2>
-                <span class="status">Status: Online</span>
-            </header>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Total Requests</h3>
+                        <p id="totalRequests">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Cache Hit Rate</h3>
+                        <p id="cacheHitRate">0%</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Active Backends</h3>
+                        <p id="activeBackends">0/3</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Rate Limited</h3>
+                        <p id="rateLimited">0</p>
+                    </div>
+                </div>
+            </section>
 
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3>Total Requests</h3>
-                    <p class="metric-value">2.5M</p>
-                    <p class="metric-label">Last 24 hours</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Cache Hit Rate</h3>
-                    <p class="metric-value">85%</p>
-                    <p class="metric-label">Average</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Active Backends</h3>
-                    <p class="metric-value">3/3</p>
-                    <p class="metric-label">Healthy</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Current Version</h3>
-                    <p class="metric-value">v2</p>
-                    <p class="metric-label">Latest</p>
-                </div>
-            </div>
+            <section id="load-balancer">
+                <h2>Load Balancer Status</h2>
+                <div id="backendList" class="backend-grid"></div>
+            </section>
 
-            <div class="charts-section">
-                <div class="chart-card">
-                    <h3>Request Traffic</h3>
-                    <div class="chart-placeholder">Traffic Chart</div>
-                </div>
-                <div class="chart-card">
-                    <h3>System Health</h3>
-                    <div class="chart-placeholder">Health Status</div>
-                </div>
-            </div>
+            <section id="rate-limits">
+                <h2>Rate Limiting</h2>
+                <div class="rate-limit-stats"></div>
+            </section>
+
+            <section id="cache">
+                <h2>Cache Statistics</h2>
+                <div class="cache-stats"></div>
+            </section>
+
+            <section id="metrics">
+                <h2>System Metrics</h2>
+                <div id="metricsChart"></div>
+            </section>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
