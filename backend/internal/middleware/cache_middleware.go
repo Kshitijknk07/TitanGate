@@ -1,12 +1,11 @@
 package middleware
 
 import (
-	"bytes"
-	"net/http"
-	"time"
-
-	"titangate/internal/cache"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+    "bytes"
+    "github.com/gofiber/fiber/v2"
+    "github.com/Kshitijknk07/TitanGate/backend/internal/cache"
+    "github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+    "time"
 )
 
 var redisCache = cache.NewRedisCache()
@@ -39,15 +38,15 @@ func (r *responseRecorder) Write(p []byte) (int, error) {
 	return r.ResponseWriter.Write(p)
 }
 func CacheMiddleware(c *fiber.Ctx) error {
-    cacheKey := "resp:" + c.Path()
-
-    if cachedResponse, err := redisCache.Get(cacheKey); err == nil {
-        metrics.CacheHits.Inc()
-        return c.Send([]byte(cachedResponse))
+    if c.Method() != "GET" {
+        return c.Next()
     }
+    key := "cache:" + c.Path()
     
+    if cached, err := services.RedisClient.Get(services.Ctx, key).Result(); err == nil {
+        metrics.CacheHits.Inc()
+        return c.Type("json").Send([]byte(cached))
+    }
     metrics.CacheMisses.Inc()
-    
-    // Continue with the request
     return c.Next()
 }

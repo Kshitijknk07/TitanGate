@@ -4,25 +4,20 @@ package services
 import (
 	"context"
 	"log"
-
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
 	RedisClient *redis.Client
-	Ctx         = context.Background() 
+	Ctx = context.Background()
 )
 
 func InitRedis() {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
-		DB:   0,
+		DB: 0,
 	})
-
-
-	_, err := RedisClient.Ping(Ctx).Result()
-	if err != nil {
-		log.Fatalf("Could not connect to Redis: %v", err)
+	if err := RedisClient.Ping(Ctx).Err(); err != nil {
+		log.Fatal("Redis connection failed:", err)
 	}
-	log.Println("Connected to Redis")
 }

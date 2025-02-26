@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TitanGate Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h1>TitanGate</h1>
+            <nav>
+                <a href="#" class="active"><i class="material-icons">dashboard</i>Dashboard</a>
+                <a href="#"><i class="material-icons">shield</i>Rate Limiting</a>
+                <a href="#"><i class="material-icons">storage</i>Caching</a>
+                <a href="#"><i class="material-icons">alt_route</i>API Versions</a>
+                <a href="#"><i class="material-icons">analytics</i>Analytics</a>
+                <a href="#"><i class="material-icons">balance</i>Load Balancing</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header>
+                <h2>System Overview</h2>
+                <span class="status">Status: Online</span>
+            </header>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Requests</h3>
+                    <p class="metric-value">2.5M</p>
+                    <p class="metric-label">Last 24 hours</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Cache Hit Rate</h3>
+                    <p class="metric-value">85%</p>
+                    <p class="metric-label">Average</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Active Backends</h3>
+                    <p class="metric-value">3/3</p>
+                    <p class="metric-label">Healthy</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Current Version</h3>
+                    <p class="metric-value">v2</p>
+                    <p class="metric-label">Latest</p>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Request Traffic</h3>
+                    <div class="chart-placeholder">Traffic Chart</div>
+                </div>
+                <div class="chart-card">
+                    <h3>System Health</h3>
+                    <div class="chart-placeholder">Health Status</div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
