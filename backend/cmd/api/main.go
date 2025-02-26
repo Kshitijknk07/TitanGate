@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/adaptor/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/loadbalancer/loadbalancer"
 )
 
 func main() {
@@ -43,7 +44,22 @@ func main() {
 	versionConfig := middleware.NewVersionConfig()
 	app.Use(middleware.APIVersionMiddleware(versionConfig))
 	
-	
+	backends := []loadbalancer.Backend{
+		{URL: "http://localhost:3001", Weight: 1, Active: true},
+		{URL: "http://localhost:3002", Weight: 1, Active: true},
+		{URL: "http://localhost:3003", Weight: 1, Active: true},
+	}
+
+	lb := loadbalancer.NewLoadBalancer(backends)
+	healthChecker := loadbalancer.NewHealthChecker(lb, 5*time.Second)
+	healthChecker.Start()
+
+	app := fiber.New()
+
+	app.Use(middleware.MetricsMiddleware())
+	app.Use(middleware.RateLimit)
+	app.Use(middleware.CacheMiddleware)
+	app.Use("/api", middleware.LoadBalancerMiddleware(lb))
 	app.Use(middleware.RateLimit)
 	app.Use(middleware.CacheMiddleware)
 	
