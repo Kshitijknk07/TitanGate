@@ -28,14 +28,14 @@ func main() {
         EnablePrintRoutes: true,
     })
     
-    // Add metrics middleware first
+    
     app.Use(middleware.MetricsMiddleware())
     
-    // Other middleware
+    
     app.Use(middleware.RateLimit)
     app.Use(middleware.CacheMiddleware)
 
-    // Prometheus metrics endpoint
+    
     metricsHandler := adaptor.HTTPHandler(promhttp.Handler())
     app.Get("/metrics", func(c *fiber.Ctx) error {
         return metricsHandler(c)

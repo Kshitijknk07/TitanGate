@@ -65,7 +65,7 @@ func (lb *LoadBalancer) NextBackend() *Backend {
 
 func (lb *LoadBalancer) getLeastConnectedBackend(backends []*Backend) *Backend {
 	var selected *Backend
-	minConn := int32(^uint32(0) >> 1) // Max int32
+	minConn := int32(^uint32(0) >> 1)
 
 	for _, b := range backends {
 		if conns := atomic.LoadInt32(&b.ActiveConns); conns < minConn {

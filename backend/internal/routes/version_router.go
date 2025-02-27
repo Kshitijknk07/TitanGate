@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Supported API versions
+
 const (
 	MinVersion    = 1
 	CurrentVersion = 2

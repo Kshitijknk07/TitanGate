@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// HealthCheckV2 is an example of a v2 endpoint with enhanced response
+
 func HealthCheckV2(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":    "OK",
@@ -19,7 +19,7 @@ func HealthCheckV2(c *fiber.Ctx) error {
 	})
 }
 
-// GetUserHandlerV2 is an example of a v2 user endpoint
+
 func GetUserHandlerV2(c *fiber.Ctx) error {
 	userID := c.Query("id")
 	cacheKey := "user:v2:" + userID
