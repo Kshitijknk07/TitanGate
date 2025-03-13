@@ -2,38 +2,50 @@ package loadbalancer
 
 import (
 	"net/http"
+	"sync"
 	"time"
 )
 
 type HealthChecker struct {
-	client  *http.Client
-	lb      *LoadBalancer
-	timeout time.Duration
+	lb       *LoadBalancer
+	interval time.Duration
+	client   *http.Client
+	mu       sync.RWMutex
 }
 
-func NewHealthChecker(lb *LoadBalancer, timeout time.Duration) *HealthChecker {
+func NewHealthChecker(lb *LoadBalancer, interval time.Duration) *HealthChecker {
 	return &HealthChecker{
-		client:  &http.Client{Timeout: timeout},
-		lb:      lb,
-		timeout: timeout,
+		lb:       lb,
+		interval: interval,
+		client:   &http.Client{Timeout: 5 * time.Second},
 	}
 }
 
 func (hc *HealthChecker) Start() {
-	ticker := time.NewTicker(10 * time.Second)
-	go func() {
-		for range ticker.C {
-			hc.checkHealth()
-		}
-	}()
+	go hc.checkHealth()
 }
 
 func (hc *HealthChecker) checkHealth() {
-	for _, backend := range hc.lb.backends {
-		resp, err := hc.client.Get(backend.URL + "/health")
-		backend.Active = err == nil && resp != nil && resp.StatusCode == http.StatusOK
-		if resp != nil {
-			resp.Body.Close()
+	ticker := time.NewTicker(hc.interval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		hc.mu.RLock()
+		backends := hc.lb.backends
+		hc.mu.RUnlock()
+
+		for i := range backends {
+			go func(i int) {
+				backend := &backends[i]
+				resp, err := hc.client.Get(backend.URL + "/health")
+				if err != nil {
+					backend.Active = false
+					return
+				}
+				defer resp.Body.Close()
+
+				backend.Active = resp.StatusCode == http.StatusOK
+			}(i)
 		}
 	}
 }

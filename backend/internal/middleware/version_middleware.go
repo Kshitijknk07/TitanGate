@@ -22,10 +22,8 @@ func APIVersionMiddleware(config VersionConfig) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var version string
 
-		
 		version = c.Get(config.HeaderName)
 
-		
 		if version == "" {
 			path := c.Path()
 			if strings.HasPrefix(path, "/api/") {
@@ -36,15 +34,11 @@ func APIVersionMiddleware(config VersionConfig) fiber.Handler {
 			}
 		}
 
-		
 		if version == "" {
 			version = config.DefaultVersion
 		}
 
-		
 		c.Locals("version", version)
-
-		
 		c.Set("X-API-Version", version)
 
 		return c.Next()

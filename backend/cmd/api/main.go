@@ -1,64 +1,97 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/Kshitijknk07/TitanGate/backend/internal/config"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/middleware"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/routes"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/loadbalancer"  // Updated this line
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/adaptor/v2"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/cache"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/loadbalancer"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/middleware"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
 )
 
 func main() {
-	config.LoadEnv()
-	services.InitRedis()
-	services.InitCache()
-	
-	port := os.Getenv("PORT")
-	appName := os.Getenv("APP_NAME")
-	
 	app := fiber.New(fiber.Config{
-        EnablePrintRoutes: true,
-    })
-    
-    
-    app.Use(middleware.MetricsMiddleware())
-    
-    
-    app.Use(middleware.RateLimit)
-    app.Use(middleware.CacheMiddleware)
-
-    
-    metricsHandler := adaptor.HTTPHandler(promhttp.Handler())
-    app.Get("/metrics", func(c *fiber.Ctx) error {
-        return metricsHandler(c)
-    })
-
-	versionConfig := middleware.NewVersionConfig()
-	app.Use(middleware.APIVersionMiddleware(versionConfig))
-	
-	backends := []loadbalancer.Backend{
-		{URL: "http://localhost:3001", Weight: 1, Active: true},
-		{URL: "http://localhost:3002", Weight: 1, Active: true},
-		{URL: "http://localhost:3003", Weight: 1, Active: true},
-	}
-	
-	lb := loadbalancer.NewLoadBalancer(backends)
-	healthChecker := loadbalancer.NewHealthChecker(lb, 5*time.Second)
-	healthChecker.Start()
-	app.Static("/", "./static")
-	app.Use("/api", middleware.LoadBalancerMiddleware(lb))
-	vRouter := routes.NewVersionedRouter(app)
-	routes.SetupRoutes(app, vRouter)
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString(fmt.Sprintf("%s Backend is Running!", appName))
+		AppName: "TitanGate API Gateway",
 	})
-	log.Fatal(app.Listen(":" + port))
+
+	app.Use(recover.New())
+	app.Use(logger.New())
+	app.Use(cors.New())
+
+	backends := []loadbalancer.Backend{
+		{URL: "http://localhost:8081", Weight: 1, Active: true},
+		{URL: "http://localhost:8082", Weight: 2, Active: true},
+		{URL: "http://localhost:8083", Weight: 1, Active: true},
+	}
+
+	weights := make([]int, len(backends))
+	for i, b := range backends {
+		weights[i] = b.Weight
+	}
+
+	algorithm := loadbalancer.NewWeightedRoundRobin(weights)
+	lb := loadbalancer.NewLoadBalancer(backends, algorithm)
+	healthChecker := loadbalancer.NewHealthChecker(lb, 10*time.Second)
+	healthChecker.Start()
+
+	app.Use(func(c *fiber.Ctx) error {
+		nextBackend := lb.NextBackend()
+		if !backends[nextBackend].Active {
+			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+				"error": "No healthy backends available",
+			})
+		}
+
+		proxy := fiber.New()
+		proxy.All("/*", func(c *fiber.Ctx) error {
+			url := backends[nextBackend].URL + c.Path()
+			return c.Redirect(url, fiber.StatusTemporaryRedirect)
+		})
+
+		return proxy.Handler()(c)
+	})
+
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status": "healthy",
+			"time":   time.Now(),
+		})
+	})
+
+	app.Get("/metrics", metrics.Handler)
+
+	app.Static("/", "./public")
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message": "TitanGate API Gateway is running",
+		})
+	})
+
+	go func() {
+		if err := app.Listen(":3000"); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := app.ShutdownWithContext(ctx); err != nil {
+		log.Fatal(err)
+	}
 }

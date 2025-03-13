@@ -26,41 +26,27 @@ type Backend struct {
 	SuccessCount  int32
 }
 
+type Algorithm interface {
+	NextBackend() *Backend
+}
+
 type LoadBalancer struct {
-	backends  []*Backend
-	current   uint64
-	mu        sync.RWMutex
+	backends  []Backend
 	algorithm Algorithm
+	mu        sync.RWMutex
 }
 
 func NewLoadBalancer(backends []Backend, algorithm Algorithm) *LoadBalancer {
-	lb := &LoadBalancer{
-		backends:  make([]*Backend, len(backends)),
+	return &LoadBalancer{
+		backends:  backends,
 		algorithm: algorithm,
 	}
-	for i := range backends {
-		lb.backends[i] = &backends[i]
-	}
-	return lb
 }
 
 func (lb *LoadBalancer) NextBackend() *Backend {
 	lb.mu.RLock()
 	defer lb.mu.RUnlock()
-
-	activeBackends := lb.getActiveBackends()
-	if len(activeBackends) == 0 {
-		return nil
-	}
-
-	switch lb.algorithm {
-	case LeastConn:
-		return lb.getLeastConnectedBackend(activeBackends)
-	case WeightedRR:
-		return lb.getWeightedRoundRobinBackend(activeBackends)
-	default:
-		return lb.getRoundRobinBackend(activeBackends)
-	}
+	return lb.algorithm.NextBackend()
 }
 
 func (lb *LoadBalancer) getLeastConnectedBackend(backends []*Backend) *Backend {

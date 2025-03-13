@@ -3,67 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TitanGate Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>TitanGate - API Gateway Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-chartjs-2"></script>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <h1>TitanGate</h1>
-            <nav>
-                <a href="#overview" class="active">Overview</a>
-                <a href="#load-balancer">Load Balancer</a>
-                <a href="#rate-limits">Rate Limits</a>
-                <a href="#cache">Cache</a>
-                <a href="#metrics">Metrics</a>
-            </nav>
-        </aside>
-
-        <main class="content">
-            <section id="overview" class="active">
-                <h2>System Overview</h2>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <h3>Total Requests</h3>
-                        <p id="totalRequests">0</p>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Cache Hit Rate</h3>
-                        <p id="cacheHitRate">0%</p>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Active Backends</h3>
-                        <p id="activeBackends">0/3</p>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Rate Limited</h3>
-                        <p id="rateLimited">0</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="load-balancer">
-                <h2>Load Balancer Status</h2>
-                <div id="backendList" class="backend-grid"></div>
-            </section>
-
-            <section id="rate-limits">
-                <h2>Rate Limiting</h2>
-                <div class="rate-limit-stats"></div>
-            </section>
-
-            <section id="cache">
-                <h2>Cache Statistics</h2>
-                <div class="cache-stats"></div>
-            </section>
-
-            <section id="metrics">
-                <h2>System Metrics</h2>
-                <div id="metricsChart"></div>
-            </section>
-        </main>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="dashboard.js"></script>
+    <div id="root"></div>
+    <script type="text/babel" src="/js/app.js"></script>
 </body>
 </html>
