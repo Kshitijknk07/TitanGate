@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/v9 v9.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

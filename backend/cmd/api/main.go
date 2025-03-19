@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"github.com/Kshitijknk07/TitanGate/backend/internal/config"
@@ -97,8 +98,20 @@ func main() {
 	defer services.CloseRedis()
 	services.InitCache()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			code := fiber.StatusInternalServerError
+			if e, ok := err.(*fiber.Error); ok {
+				code = e.Code
+			}
+			return c.Status(code).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		},
+	})
+
 	app.Use(recover.New())
+	app.Use(cors.New())
 	app.Use(middleware.LoggerMiddleware())
 	app.Use(middleware.MetricsMiddleware())
 
