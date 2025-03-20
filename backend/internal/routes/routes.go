@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"os"
+
 	"github.com/Kshitijknk07/TitanGate/backend/internal/handlers"
 	"github.com/Kshitijknk07/TitanGate/backend/internal/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +20,11 @@ func SetupRoutes(app *fiber.App) {
 	}
 	transformConfig.QueryTransform = map[string]string{
 		"api_key": "token",
+	}
+
+	// Enable debug mode in development
+	if os.Getenv("ENV") == "development" {
+		transformConfig.DebugMode = true
 	}
 
 	// Apply global middleware

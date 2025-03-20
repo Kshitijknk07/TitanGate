@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -18,6 +19,7 @@ type TransformConfig struct {
 	OutputFormat      string // "json", "xml", "yaml"
 	HeaderTransform   map[string]string
 	QueryTransform    map[string]string
+	DebugMode         bool
 }
 
 func NewTransformConfig() TransformConfig {
@@ -28,6 +30,7 @@ func NewTransformConfig() TransformConfig {
 		OutputFormat:      "json",
 		HeaderTransform:   make(map[string]string),
 		QueryTransform:    make(map[string]string),
+		DebugMode:         false,
 	}
 }
 
@@ -39,15 +42,23 @@ func validateFormat(format string) error {
 	return nil
 }
 
+func logDebug(config TransformConfig, format string, args ...interface{}) {
+	if config.DebugMode {
+		log.Printf("[Transformer] "+format, args...)
+	}
+}
+
 func TransformerMiddleware(config TransformConfig) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Validate formats
 		if err := validateFormat(config.InputFormat); err != nil {
+			logDebug(config, "Invalid input format: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": err.Error(),
 			})
 		}
 		if err := validateFormat(config.OutputFormat); err != nil {
+			logDebug(config, "Invalid output format: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": err.Error(),
 			})
@@ -55,9 +66,12 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 
 		// Transform request if enabled
 		if config.RequestTransform {
+			logDebug(config, "Processing request transformation")
+
 			// Transform headers
 			for oldKey, newKey := range config.HeaderTransform {
 				if value := c.Get(oldKey); value != "" {
+					logDebug(config, "Transforming header: %s -> %s", oldKey, newKey)
 					c.Set(newKey, value)
 					c.Request().Header.Del(oldKey)
 				}
@@ -66,6 +80,7 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 			// Transform query parameters
 			for oldKey, newKey := range config.QueryTransform {
 				if value := c.Query(oldKey); value != "" {
+					logDebug(config, "Transforming query param: %s -> %s", oldKey, newKey)
 					c.Request().URI().QueryArgs().Set(newKey, value)
 					c.Request().URI().QueryArgs().Del(oldKey)
 				}
@@ -73,6 +88,7 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 
 			// Transform request body
 			if len(c.Body()) > 0 {
+				logDebug(config, "Transforming request body from %s to %s", config.InputFormat, config.OutputFormat)
 				var transformedBody interface{}
 				var err error
 
@@ -87,8 +103,10 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 				}
 
 				if err != nil {
+					logDebug(config, "Failed to parse request body: %v", err)
 					return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-						"error": "Invalid request body format",
+						"error":   "Invalid request body format",
+						"details": err.Error(),
 					})
 				}
 
@@ -104,12 +122,15 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 				}
 
 				if err != nil {
+					logDebug(config, "Failed to transform request body: %v", err)
 					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-						"error": "Failed to transform request body",
+						"error":   "Failed to transform request body",
+						"details": err.Error(),
 					})
 				}
 
 				c.Request().SetBody(outputBody)
+				logDebug(config, "Request body transformation completed")
 			}
 		}
 
@@ -121,6 +142,7 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 
 		// Transform response if enabled
 		if config.ResponseTransform && len(c.Response().Body()) > 0 {
+			logDebug(config, "Processing response transformation")
 			var transformedBody interface{}
 			var err error
 
@@ -135,8 +157,10 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 			}
 
 			if err != nil {
+				logDebug(config, "Failed to parse response body: %v", err)
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Failed to parse response body",
+					"error":   "Failed to parse response body",
+					"details": err.Error(),
 				})
 			}
 
@@ -152,12 +176,15 @@ func TransformerMiddleware(config TransformConfig) fiber.Handler {
 			}
 
 			if err != nil {
+				logDebug(config, "Failed to transform response body: %v", err)
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Failed to transform response body",
+					"error":   "Failed to transform response body",
+					"details": err.Error(),
 				})
 			}
 
 			c.Response().SetBody(outputBody)
+			logDebug(config, "Response body transformation completed")
 		}
 
 		return err
