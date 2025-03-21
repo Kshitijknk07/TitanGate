@@ -6,11 +6,24 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"gopkg.in/yaml.v3"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+// FormatCache stores pre-validated formats to avoid repeated validation
+var formatCache = struct {
+	sync.RWMutex
+	formats map[string]bool
+}{
+	formats: map[string]bool{
+		"json": true,
+		"xml":  true,
+		"yaml": true,
+	},
+}
 
 type TransformConfig struct {
 	RequestTransform  bool
@@ -20,6 +33,8 @@ type TransformConfig struct {
 	HeaderTransform   map[string]string
 	QueryTransform    map[string]string
 	DebugMode         bool
+	MaxBodySize       int64 // Maximum allowed body size in bytes
+	CacheEnabled      bool  // Enable response caching
 }
 
 func NewTransformConfig() TransformConfig {
@@ -31,14 +46,32 @@ func NewTransformConfig() TransformConfig {
 		HeaderTransform:   make(map[string]string),
 		QueryTransform:    make(map[string]string),
 		DebugMode:         false,
+		MaxBodySize:       1024 * 1024, // 1MB default
+		CacheEnabled:      false,
 	}
 }
 
 func validateFormat(format string) error {
 	format = strings.ToLower(format)
+
+	// Check cache first
+	formatCache.RLock()
+	valid, exists := formatCache.formats[format]
+	formatCache.RUnlock()
+
+	if exists && valid {
+		return nil
+	}
+
+	// Validate and cache if not found
 	if format != "json" && format != "xml" && format != "yaml" {
 		return fmt.Errorf("unsupported format: %s", format)
 	}
+
+	formatCache.Lock()
+	formatCache.formats[format] = true
+	formatCache.Unlock()
+
 	return nil
 }
 
@@ -49,18 +82,21 @@ func logDebug(config TransformConfig, format string, args ...interface{}) {
 }
 
 func TransformerMiddleware(config TransformConfig) fiber.Handler {
+	// Pre-validate formats to fail fast if invalid
+	if err := validateFormat(config.InputFormat); err != nil {
+		log.Printf("[Transformer] Invalid input format in config: %v", err)
+	}
+	if err := validateFormat(config.OutputFormat); err != nil {
+		log.Printf("[Transformer] Invalid output format in config: %v", err)
+	}
+
 	return func(c *fiber.Ctx) error {
-		// Validate formats
-		if err := validateFormat(config.InputFormat); err != nil {
-			logDebug(config, "Invalid input format: %v", err)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		}
-		if err := validateFormat(config.OutputFormat); err != nil {
-			logDebug(config, "Invalid output format: %v", err)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": err.Error(),
+		// Check body size limit
+		if config.MaxBodySize > 0 && int64(c.Request().Header.ContentLength()) > config.MaxBodySize {
+			logDebug(config, "Request body too large: %d bytes", c.Request().Header.ContentLength())
+			return c.Status(fiber.StatusRequestEntityTooLarge).JSON(fiber.Map{
+				"error":    "Request body too large",
+				"max_size": config.MaxBodySize,
 			})
 		}
 

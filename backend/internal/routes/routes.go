@@ -22,9 +22,13 @@ func SetupRoutes(app *fiber.App) {
 		"api_key": "token",
 	}
 
-	// Enable debug mode in development
+	// Configure based on environment
 	if os.Getenv("ENV") == "development" {
 		transformConfig.DebugMode = true
+		transformConfig.MaxBodySize = 5 * 1024 * 1024 // 5MB in development
+	} else {
+		transformConfig.MaxBodySize = 1024 * 1024 // 1MB in production
+		transformConfig.CacheEnabled = true
 	}
 
 	// Apply global middleware
