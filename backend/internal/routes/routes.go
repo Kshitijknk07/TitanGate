@@ -11,7 +11,6 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-	// Create transformer config
 	transformConfig := middleware.NewTransformConfig()
 	transformConfig.InputFormat = "json"
 	transformConfig.OutputFormat = "json"
@@ -22,41 +21,34 @@ func SetupRoutes(app *fiber.App) {
 		"api_key": "token",
 	}
 
-	// Configure based on environment
 	if os.Getenv("ENV") == "development" {
 		transformConfig.DebugMode = true
-		transformConfig.MaxBodySize = 5 * 1024 * 1024 // 5MB in development
+		transformConfig.MaxBodySize = 5 * 1024 * 1024
 	} else {
-		transformConfig.MaxBodySize = 1024 * 1024 // 1MB in production
+		transformConfig.MaxBodySize = 1024 * 1024
 		transformConfig.CacheEnabled = true
 	}
 
-	// Apply global middleware
 	app.Use(middleware.LoggerMiddleware())
 	app.Use(middleware.MetricsMiddleware())
 	app.Use(middleware.RateLimit)
 	app.Use(middleware.TransformerMiddleware(transformConfig))
 
-	// API routes
 	api := app.Group("/api")
 	api.Use(middleware.AuthMiddleware(middleware.NewAuthConfig()))
 
-	// Health check endpoint
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.SendString("OK")
 	})
 
-	// Metrics endpoint
 	promHandler := fasthttpadaptor.NewFastHTTPHandler(promhttp.Handler())
 	app.Get("/metrics", func(c *fiber.Ctx) error {
 		promHandler(c.Context())
 		return nil
 	})
 
-	// API version 1 routes
 	v1 := api.Group("/v1")
 	{
-		// User routes
 		users := v1.Group("/users")
 		users.Get("/", handlers.GetUsers)
 		users.Get("/:id", handlers.GetUser)
