@@ -8,13 +8,13 @@ import (
 
 type VersionConfig struct {
 	DefaultVersion string
-	HeaderName    string
+	HeaderName     string
 }
 
 func NewVersionConfig() VersionConfig {
 	return VersionConfig{
 		DefaultVersion: "v1",
-		HeaderName:    "Accept-Version",
+		HeaderName:     "Accept-Version",
 	}
 }
 

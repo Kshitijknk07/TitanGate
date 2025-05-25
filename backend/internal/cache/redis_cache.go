@@ -29,4 +29,4 @@ func (c *RedisCache) Get(key string) (interface{}, bool) {
 
 func (c *RedisCache) Set(key string, value interface{}, expiration time.Duration) {
 	c.client.Set(c.ctx, key, value, expiration)
-} 
+}

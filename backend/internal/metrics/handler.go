@@ -8,4 +8,4 @@ import (
 
 func Handler(c *fiber.Ctx) error {
 	return adaptor.HTTPHandler(promhttp.Handler())(c)
-} 
+}

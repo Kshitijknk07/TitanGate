@@ -92,57 +92,43 @@ func (w *WeightedRoundRobin) Next() int {
 }
 
 func main() {
-	// Load environment variables
 	config.LoadEnv()
-
-	// Initialize Redis and cache
 	services.InitRedis()
 	defer services.CloseRedis()
 	services.InitCache()
 
-	// Fiber app
 	app := fiber.New()
 	app.Use(recover.New())
 	app.Use(middleware.LoggerMiddleware())
 	app.Use(middleware.MetricsMiddleware())
 
-	// Auth middleware
 	authConfig := middleware.NewAuthConfig()
 	app.Use(middleware.AuthMiddleware(authConfig))
 
-	// Rate limit middleware
 	app.Use(middleware.RateLimit)
 
-	// Set up backends for load balancer (customize as needed)
 	backends := []*loadbalancer.Backend{
 		{URL: "http://localhost:8081", Weight: 5, Active: true},
 		{URL: "http://localhost:8082", Weight: 3, Active: true},
 		{URL: "http://localhost:8083", Weight: 2, Active: true},
 	}
-	algorithm := loadbalancer.NewRoundRobin(backends) // Use the available algorithm
+	algorithm := loadbalancer.NewRoundRobin(backends)
 	lb := loadbalancer.NewLoadBalancer(backends, algorithm)
 
-	// Health checker for backends
 	healthChecker := loadbalancer.NewHealthChecker(lb, 10*time.Second)
 	healthChecker.Start()
 
-	// Circuit breaker middleware (customize threshold and timeout)
 	app.Use(middleware.CircuitBreakerMiddleware(5, 30*time.Second))
 
-	// Register routes directly
 	routes.SetupRoutes(app)
 
-	// Load balancer middleware for API traffic
 	app.Use("/api/*", middleware.LoadBalancerMiddleware(lb))
 
-	// Health and metrics endpoints
 	app.Get("/health", handlers.HealthCheck)
 	app.Get("/metrics", metrics.Handler)
 
-	// Serve static dashboard
 	app.Static("/", "./static")
 
-	// Graceful shutdown
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

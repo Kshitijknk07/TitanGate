@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
+	"github.com/gofiber/fiber/v2"
 )
 
 func RateLimit(c *fiber.Ctx) error {

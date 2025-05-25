@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 type ValidationError struct {
@@ -38,7 +38,7 @@ func ValidateRequest(model interface{}) fiber.Handler {
 				})
 			}
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Validation failed",
+				"error":  "Validation failed",
 				"errors": errors,
 			})
 		}
@@ -71,7 +71,7 @@ func ValidateQuery(model interface{}) fiber.Handler {
 				})
 			}
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Validation failed",
+				"error":  "Validation failed",
 				"errors": errors,
 			})
 		}
@@ -79,4 +79,4 @@ func ValidateQuery(model interface{}) fiber.Handler {
 		c.Locals("validatedModel", modelInstance)
 		return c.Next()
 	}
-} 
+}

@@ -7,4 +7,4 @@ func VersionMiddleware(version string) fiber.Handler {
 		c.Set("API-Version", version)
 		return c.Next()
 	}
-} 
+}

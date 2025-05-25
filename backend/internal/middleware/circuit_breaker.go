@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+	"github.com/gofiber/fiber/v2"
 )
 
 type CircuitState int
@@ -105,4 +105,4 @@ func CircuitBreakerMiddleware(threshold int, resetTimeout time.Duration) fiber.H
 			return c.Next()
 		})
 	}
-} 
+}

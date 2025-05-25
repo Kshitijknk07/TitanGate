@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+	"github.com/gofiber/fiber/v2"
 )
 
 type LogEntry struct {
@@ -42,14 +42,14 @@ func LoggerMiddleware() fiber.Handler {
 		metrics.RequestCounter.WithLabelValues(c.Method(), c.Path()).Inc()
 
 		logEntry := LogEntry{
-			Timestamp:   time.Now(),
-			Method:      c.Method(),
-			Path:        c.Path(),
-			Status:      c.Response().StatusCode(),
-			Duration:    duration,
-			IP:          c.IP(),
-			UserAgent:   c.Get("User-Agent"),
-			RequestID:   requestID,
+			Timestamp: time.Now(),
+			Method:    c.Method(),
+			Path:      c.Path(),
+			Status:    c.Response().StatusCode(),
+			Duration:  duration,
+			IP:        c.IP(),
+			UserAgent: c.Get("User-Agent"),
+			RequestID: requestID,
 		}
 
 		if c.Method() != "GET" && len(body) > 0 {
@@ -70,4 +70,4 @@ func generateRequestID() string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
-} 
+}

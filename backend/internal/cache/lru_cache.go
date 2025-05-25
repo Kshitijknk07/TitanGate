@@ -2,13 +2,13 @@ package cache
 
 import (
 	"fmt"
-	"github.com/hashicorp/golang-lru/v2"
+
+	lru "github.com/hashicorp/golang-lru/v2"
 )
 
 type LRUCache struct {
 	cache *lru.Cache[string, string]
 }
-
 
 func NewLRUCache(size int) *LRUCache {
 	l, err := lru.New[string, string](size)
@@ -23,12 +23,10 @@ func (l *LRUCache) Set(key string, value string) {
 	l.cache.Add(key, value)
 }
 
-
 func (l *LRUCache) Get(key string) (string, bool) {
 	value, ok := l.cache.Get(key)
 	return value, ok
 }
-
 
 func (l *LRUCache) Remove(key string) {
 	l.cache.Remove(key)
