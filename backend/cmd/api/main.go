@@ -106,10 +106,6 @@ func main() {
 	app.Use(middleware.LoggerMiddleware())
 	app.Use(middleware.MetricsMiddleware())
 
-	// Version middleware
-	versionConfig := middleware.NewVersionConfig()
-	app.Use(middleware.APIVersionMiddleware(versionConfig))
-
 	// Auth middleware
 	authConfig := middleware.NewAuthConfig()
 	app.Use(middleware.AuthMiddleware(authConfig))
@@ -133,9 +129,8 @@ func main() {
 	// Circuit breaker middleware (customize threshold and timeout)
 	app.Use(middleware.CircuitBreakerMiddleware(5, 30*time.Second))
 
-	// API versioned router
-	vRouter := routes.NewVersionedRouter(app)
-	routes.SetupRoutes(app, vRouter)
+	// Register routes directly
+	routes.SetupRoutes(app)
 
 	// Load balancer middleware for API traffic
 	app.Use("/api/*", middleware.LoadBalancerMiddleware(lb))
@@ -148,12 +143,16 @@ func main() {
 	app.Static("/", "./static")
 
 	// Graceful shutdown
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	go func() {
-		if err := app.Listen(":8080"); err != nil {
+		if err := app.Listen(":" + port); err != nil {
 			log.Fatalf("Fiber server error: %v", err)
 		}
 	}()
-	log.Println("TitanGate API Gateway running on :8080")
+	log.Printf("TitanGate API Gateway running on :%s", port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -28,23 +27,6 @@ func NewVersionedRouter(app *fiber.App) *VersionedRouter {
 		app:               app,
 		supportedVersions: versions,
 	}
-}
-
-func (vr *VersionedRouter) Group(version string) fiber.Router {
-	if !vr.isValidVersion(version) {
-		panic(fmt.Sprintf("Invalid API version: %s", version))
-	}
-	return vr.app.Group("/api/" + version)
-}
-
-func (vr *VersionedRouter) isValidVersion(version string) bool {
-
-	matched, _ := regexp.MatchString(`^v[1-9]\d*$`, version)
-	if !matched {
-		return false
-	}
-
-	return vr.supportedVersions[version]
 }
 
 func (vr *VersionedRouter) GetLatestVersion() string {

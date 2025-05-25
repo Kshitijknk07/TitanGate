@@ -5,13 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App, vRouter *VersionedRouter) {
-
-	v1 := vRouter.Group("/v1")
-	v1.Get("/user", handlers.GetUserHandler)
-	v1.Get("/health", handlers.HealthCheck)
-
-	v2 := vRouter.Group("/v2")
-	v2.Get("/user", handlers.GetUserHandler)
-	v2.Get("/health", handlers.HealthCheck)
+func SetupRoutes(app *fiber.App) {
+	app.Get("/user", handlers.GetUserHandler)
+	app.Get("/health", handlers.HealthCheck)
 }
