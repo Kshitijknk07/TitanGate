@@ -1,7 +1,23 @@
-package loadbalancer
+package main
 
 import (
+	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+
+	"github.com/Kshitijknk07/TitanGate/backend/internal/config"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/handlers"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/loadbalancer"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/middleware"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/routes"
+	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
 )
 
 type Backend struct {
@@ -73,4 +89,76 @@ func (w *WeightedRoundRobin) Next() int {
 			return w.currentIndex
 		}
 	}
+}
+
+func main() {
+	// Load environment variables
+	config.LoadEnv()
+
+	// Initialize Redis and cache
+	services.InitRedis()
+	defer services.CloseRedis()
+	services.InitCache()
+
+	// Fiber app
+	app := fiber.New()
+	app.Use(recover.New())
+	app.Use(middleware.LoggerMiddleware())
+	app.Use(middleware.MetricsMiddleware())
+
+	// Version middleware
+	versionConfig := middleware.NewVersionConfig()
+	app.Use(middleware.APIVersionMiddleware(versionConfig))
+
+	// Auth middleware
+	authConfig := middleware.NewAuthConfig()
+	app.Use(middleware.AuthMiddleware(authConfig))
+
+	// Rate limit middleware
+	app.Use(middleware.RateLimit)
+
+	// Set up backends for load balancer (customize as needed)
+	backends := []*loadbalancer.Backend{
+		{URL: "http://localhost:8081", Weight: 5, Active: true},
+		{URL: "http://localhost:8082", Weight: 3, Active: true},
+		{URL: "http://localhost:8083", Weight: 2, Active: true},
+	}
+	algorithm := loadbalancer.NewRoundRobin(backends) // Use the available algorithm
+	lb := loadbalancer.NewLoadBalancer(backends, algorithm)
+
+	// Health checker for backends
+	healthChecker := loadbalancer.NewHealthChecker(lb, 10*time.Second)
+	healthChecker.Start()
+
+	// Circuit breaker middleware (customize threshold and timeout)
+	app.Use(middleware.CircuitBreakerMiddleware(5, 30*time.Second))
+
+	// API versioned router
+	vRouter := routes.NewVersionedRouter(app)
+	routes.SetupRoutes(app, vRouter)
+
+	// Load balancer middleware for API traffic
+	app.Use("/api/*", middleware.LoadBalancerMiddleware(lb))
+
+	// Health and metrics endpoints
+	app.Get("/health", handlers.HealthCheck)
+	app.Get("/metrics", metrics.Handler)
+
+	// Serve static dashboard
+	app.Static("/", "./static")
+
+	// Graceful shutdown
+	go func() {
+		if err := app.Listen(":8080"); err != nil {
+			log.Fatalf("Fiber server error: %v", err)
+		}
+	}()
+	log.Println("TitanGate API Gateway running on :8080")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down gracefully...")
+	_ = app.Shutdown()
 }
