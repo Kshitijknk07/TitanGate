@@ -36,7 +36,7 @@ func (hc *HealthChecker) checkHealth() {
 
 		for i := range backends {
 			go func(i int) {
-				backend := &backends[i]
+				backend := backends[i]
 				resp, err := hc.client.Get(backend.URL + "/health")
 				if err != nil {
 					backend.Active = false
