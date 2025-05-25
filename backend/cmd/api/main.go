@@ -1,97 +1,76 @@
-package main
+package loadbalancer
 
 import (
-	"context"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/cache"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/loadbalancer"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/metrics"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/middleware"
-	"github.com/Kshitijknk07/TitanGate/backend/internal/services"
+	"sync"
 )
 
-func main() {
-	app := fiber.New(fiber.Config{
-		AppName: "TitanGate API Gateway",
-	})
+type Backend struct {
+	URL    string
+	Weight int
+	Active bool
+}
 
-	app.Use(recover.New())
-	app.Use(logger.New())
-	app.Use(cors.New())
+type WeightedRoundRobin struct {
+	weights       []int
+	currentIndex  int
+	currentWeight int
+	maxWeight     int
+	gcdWeight     int
+	mu            sync.Mutex
+}
 
-	backends := []loadbalancer.Backend{
-		{URL: "http://localhost:8081", Weight: 1, Active: true},
-		{URL: "http://localhost:8082", Weight: 2, Active: true},
-		{URL: "http://localhost:8083", Weight: 1, Active: true},
+func gcd(a, b int) int {
+	if b == 0 {
+		return a
 	}
+	return gcd(b, a%b)
+}
 
-	weights := make([]int, len(backends))
-	for i, b := range backends {
-		weights[i] = b.Weight
+func getGCD(weights []int) int {
+	g := weights[0]
+	for _, w := range weights[1:] {
+		g = gcd(g, w)
 	}
+	return g
+}
 
-	algorithm := loadbalancer.NewWeightedRoundRobin(weights)
-	lb := loadbalancer.NewLoadBalancer(backends, algorithm)
-	healthChecker := loadbalancer.NewHealthChecker(lb, 10*time.Second)
-	healthChecker.Start()
-
-	app.Use(func(c *fiber.Ctx) error {
-		nextBackend := lb.NextBackend()
-		if !backends[nextBackend].Active {
-			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
-				"error": "No healthy backends available",
-			})
+func max(weights []int) int {
+	m := weights[0]
+	for _, w := range weights[1:] {
+		if w > m {
+			m = w
 		}
+	}
+	return m
+}
 
-		proxy := fiber.New()
-		proxy.All("/*", func(c *fiber.Ctx) error {
-			url := backends[nextBackend].URL + c.Path()
-			return c.Redirect(url, fiber.StatusTemporaryRedirect)
-		})
+func NewWeightedRoundRobin(weights []int) *WeightedRoundRobin {
+	return &WeightedRoundRobin{
+		weights:       weights,
+		currentIndex:  -1,
+		currentWeight: 0,
+		maxWeight:     max(weights),
+		gcdWeight:     getGCD(weights),
+	}
+}
 
-		return proxy.Handler()(c)
-	})
+func (w *WeightedRoundRobin) Next() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status": "healthy",
-			"time":   time.Now(),
-		})
-	})
-
-	app.Get("/metrics", metrics.Handler)
-
-	app.Static("/", "./public")
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"message": "TitanGate API Gateway is running",
-		})
-	})
-
-	go func() {
-		if err := app.Listen(":3000"); err != nil {
-			log.Fatal(err)
+	for {
+		w.currentIndex = (w.currentIndex + 1) % len(w.weights)
+		if w.currentIndex == 0 {
+			w.currentWeight -= w.gcdWeight
+			if w.currentWeight <= 0 {
+				w.currentWeight = w.maxWeight
+				if w.currentWeight == 0 {
+					return -1
+				}
+			}
 		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := app.ShutdownWithContext(ctx); err != nil {
-		log.Fatal(err)
+		if w.weights[w.currentIndex] >= w.currentWeight {
+			return w.currentIndex
+		}
 	}
 }
